@@ -1,3 +1,6 @@
+streamlit
 python-pptx
-deepseek
+openai
+requests
+pywin32
 python-dotenv 
