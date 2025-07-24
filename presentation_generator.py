@@ -6,6 +6,8 @@ from pptx.dml.color import RGBColor
 from io import BytesIO
 from openai import OpenAI
 import os  # <-- Add this
+from dotenv import load_dotenv
+load_dotenv()
 
 # --- API Keys are now loaded from environment variables ---
 # Set DEEPSEEK_API_KEY and UNSPLASH_ACCESS_KEY in your environment or in a .env file
@@ -94,7 +96,10 @@ def add_image_text_slide(prs, image_url, title, body, image_pos='right', image_f
     else:
         img_x = 0
         txt_x = image_width
-    img_data = BytesIO(requests.get(image_url).content)
+    # Validate image_url
+    if not image_url or not isinstance(image_url, str) or not image_url.startswith("http"):
+        image_url = "https://via.placeholder.com/300x200?text=No+Image"
+    img_data = BytesIO(requests.get(image_url, verify=False).content)
     slide.shapes.add_picture(
         img_data,
         Inches(img_x),
@@ -148,7 +153,10 @@ def add_three_block_slide(prs, image_urls, texts, title="", font_name="Arial"):
         p.font.color.rgb = RGBColor(0, 102, 204)
     for i in range(3):
         left = Inches(i * block_width)
-        img_stream = BytesIO(requests.get(image_urls[i]).content)
+        img_url = image_urls[i] if i < len(image_urls) else None
+        if not img_url or not isinstance(img_url, str) or not img_url.startswith("http"):
+            img_url = "https://via.placeholder.com/300x200?text=No+Image"
+        img_stream = BytesIO(requests.get(img_url, verify=False).content)
         slide.shapes.add_picture(
             img_stream,
             Inches(i * block_width + (block_width - 2)/2),
@@ -167,7 +175,7 @@ def add_three_block_slide(prs, image_urls, texts, title="", font_name="Arial"):
         tf.margin_top = 0
         tf.margin_bottom = 0
         p = tf.add_paragraph()
-        p.text = texts[i]
+        p.text = texts[i] if i < len(texts) else ''
         p.level = 0
         p.font.size = Pt(16)
         p.font.name = font_name
@@ -199,7 +207,10 @@ def add_four_block_layout(prs, title_text, blocks, font_name="Arial"):
     top_txt = top_img + image_height + 0.1
     for i, block in enumerate(blocks):
         left = margin + i * (card_width + spacing)
-        img_data = BytesIO(requests.get(block["image_url"]).content)
+        img_url = block["image_url"]
+        if not img_url or not isinstance(img_url, str) or not img_url.startswith("http"):
+            img_url = "https://via.placeholder.com/300x200?text=No+Image"
+        img_data = BytesIO(requests.get(img_url, verify=False).content)
         slide.shapes.add_picture(
             img_data,
             Inches(left),
