@@ -2,5 +2,4 @@ streamlit
 python-pptx
 openai
 requests
-pywin32
 python-dotenv 
